@@ -5,6 +5,7 @@ import session from "express-session";
 import 'dotenv/config';
 import e from "express";
 import ISO6391 from 'iso-639-1';
+import languageCountryMapping from "./languagemapping.js";
 
 const app = express();
 
@@ -20,9 +21,15 @@ app.use(
 );
 app.use(express.static('public'));
 
+
+function getCountryCodeForLanguage(languageCode) {
+  // Basic mapping of language codes to country codes
+  return languageCountryMapping[languageCode] || 'default'; // Use a default value if no mapping found
+}
+
 function getLanguageDetails(languageCode) {
   const name = ISO6391.getName(languageCode);
-  const countryCode = getCountryCodeForLanguage(languageCode); // Implement this function based on your mapping
+  const countryCode = getCountryCodeForLanguage(languageCode);
   return { name, countryCode };
 }
 
@@ -177,30 +184,57 @@ app.get('/edit-test/:testId', (req, res) => {
         return;
       }
 
-      // Render the edit page, passing test details and entries
-      res.render('edit-test', { test, entries });
+      const languageOptions = ISO6391.getAllNames().map(name => ({
+        name,
+        code: ISO6391.getCode(name)
+      }));
+
+      // Render the edit page, passing test details, entries, and language options
+      res.render('edit-test', { 
+        test, 
+        entries, 
+        languageOptions 
+      });
     });
   });
 });
 
+
 app.post('/edit-test/:testId', (req, res) => {
   const testId = req.params.testId;
-  const { test_name, language_from, language_to, entries } = req.body;
+  const { test_name, language_from, language_to, word_or_sentence_from, word_or_sentence_to, entry_ids } = req.body;
+
+  // Ensure word_or_sentence_from and word_or_sentence_to are arrays
+  const wordsFrom = Array.isArray(word_or_sentence_from) ? word_or_sentence_from : [word_or_sentence_from];
+  const wordsTo = Array.isArray(word_or_sentence_to) ? word_or_sentence_to : [word_or_sentence_to];
+  const ids = Array.isArray(entry_ids) ? entry_ids : [entry_ids];
 
   // Update the test details
   db.run("UPDATE tests SET test_name = ?, language_from = ?, language_to = ? WHERE id = ?", [test_name, language_from, language_to, testId], err => {
     if (err) {
-      // Handle error
       res.status(500).send("Error updating test");
       return;
     }
 
-    // Update entries here...
-    // Loop through `entries` and update each one
+    // Handle each entry
+    wordsFrom.forEach((from, index) => {
+      const to = wordsTo[index];
+      const entryId = ids[index];
+
+      if (entryId) {
+        // Update existing entry
+        db.run("UPDATE entries SET word_or_sentence_from = ?, word_or_sentence_to = ? WHERE id = ?", [from, to, entryId]);
+      } else if (from && to) {
+        // Insert new entry
+        db.run("INSERT INTO entries (test_id, word_or_sentence_from, word_or_sentence_to) VALUES (?, ?, ?)", [testId, from, to]);
+      }
+    });
 
     res.redirect('/my-tests');
   });
 });
+
+
 
 app.post('/delete-test/:testId', (req, res) => {
   const testId = req.params.testId;

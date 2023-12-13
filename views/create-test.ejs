@@ -1,26 +1,83 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- Include your head content like CSS links -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Test</title>
+  <!-- Bootstrap CSS CDN -->
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Optional: Custom Styles -->
+  <link rel="stylesheet" href="/styles/auth-styles.css">
 </head>
 <body>
-  <h1>Create a New Test</h1>
-  <form action="/create-test" method="post">
-    <input type="text" name="test_name" placeholder="Test Name" required>
+       <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <a class="navbar-brand" href="#">LanguageApp</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNavDropdown">
+      <ul class="navbar-nav mr-auto">
+        <li class="nav-item">
+          <a class="nav-link" href="/dashboard">Dashboard</a>
+        </li>
+        <li class="nav-item active">
+          <a class="nav-link" href="/my-tests">My Tests</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/progress">Progress</a>
+        </li>
+      </ul>
+      <form class="form-inline my-2 my-lg-0">
+        <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
+        <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+      </form>
+      <ul class="navbar-nav">
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <i class="fa fa-user-circle" aria-hidden="true"></i> Profile
+          </a>
+          <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+            <a class="dropdown-item" href="/profile">Settings</a>
+            <a class="dropdown-item" href="/logout">Logout</a>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </nav>
+  <div class="container mt-5">
+    <h1 class="mb-4">Create a New Test</h1>
+    <form action="/create-test" method="post">
+      <div class="form-group">
+        <label for="test_name">Test Name</label>
+        <input type="text" class="form-control" id="test_name" name="test_name" placeholder="Test Name" required>
+      </div>
 
-    <select name="language_from" required>
-      <% languages.forEach(function(language) { %>
-        <option value="<%= getCode(language) %>"><%= language %></option>
-      <% }); %>
-    </select>
+      <div class="form-row">
+        <div class="form-group col-md-6">
+          <label for="language_from">From Language</label>
+          <select id="language_from" name="language_from" class="form-control" required>
+            <% languages.forEach(function(language) { %>
+              <option value="<%= getCode(language) %>"><%= language %></option>
+            <% }); %>
+          </select>
+        </div>
 
-    <select name="language_to" required>
-      <% languages.forEach(function(language) { %>
-        <option value="<%= getCode(language) %>"><%= language %></option>
-      <% }); %>
-    </select>
+        <div class="form-group col-md-6">
+          <label for="language_to">To Language</label>
+          <select id="language_to" name="language_to" class="form-control" required>
+            <% languages.forEach(function(language) { %>
+              <option value="<%= getCode(language) %>"><%= language %></option>
+            <% }); %>
+          </select>
+        </div>
+      </div>
 
-    <button type="submit">Create Test</button>
-  </form>
+      <button type="submit" class="btn btn-primary">Create Test</button>
+    </form>
+  </div>
+
+  <!-- Bootstrap JS Bundle CDN -->
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
