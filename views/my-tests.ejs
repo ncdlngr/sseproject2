@@ -1,21 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- Include your head content like CSS links -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Tests</title>
+  <!-- Bootstrap CSS CDN -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.5.0/css/flag-icon.min.css" rel="stylesheet">
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="/styles/auth-styles.css">
 </head>
 <body>
-  <h1>My Tests</h1>
-  <a href="/create-test">Create New Test</a>
-  <ul>
-    <% tests.forEach(test => { %>
-      <li>
-        <%= test.test_name %> - <%= test.language_from %> to <%= test.language_to %>
-        <a href="/edit-test/<%= test.id %>">Edit</a>
-        <form action="/delete-test/<%= test.id %>" method="post">
-          <button type="submit">Delete</button>
-        </form>
-      </li>
-    <% }) %>
-  </ul>
+
+  <div class="container mt-5">
+    <h1>My Tests</h1>
+    <a href="/create-test" class="btn btn-primary mb-3">Create New Test</a>
+    <ul class="list-group">
+      <% tests.forEach(test => { %>
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+          <%= test.test_name %> - <%= test.language_from %> to <%= test.language_to %>
+          <div>
+            <a href="/edit-test/<%= test.id %>" class="btn btn-sm btn-info mr-2">Edit</a>
+            <form action="/delete-test/<%= test.id %>" method="post" class="d-inline">
+              <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+            </form>
+          </div>
+        </li>
+      <% }) %>
+    </ul>
+  </div>
+
+  <!-- Bootstrap JS Bundle CDN -->
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

@@ -4,6 +4,7 @@ import db from "./database.js";
 import session from "express-session";
 import 'dotenv/config';
 import e from "express";
+import ISO6391 from 'iso-639-1';
 
 const app = express();
 
@@ -18,6 +19,12 @@ app.use(
   })
 );
 app.use(express.static('public'));
+
+function getLanguageDetails(languageCode) {
+  const name = ISO6391.getName(languageCode);
+  const countryCode = getCountryCodeForLanguage(languageCode); // Implement this function based on your mapping
+  return { name, countryCode };
+}
 
 // Routes
 
@@ -83,33 +90,38 @@ app.post("/login", (req, res) => {
 });
 
 app.get('/my-tests', (req, res) => {
-  const userId = req.session.userId; // Assuming you have user session management
-  
-  // SQL to retrieve tests belonging to the logged-in user
+  const userId = req.session.userId;
+
   const sql = `SELECT * FROM tests WHERE user_id = ?`;
 
-  // Execute the query
   db.all(sql, [userId], (err, rows) => {
     if (err) {
-      // Handle error
       console.error(err.message);
       res.status(500).send("Error retrieving tests");
       return;
     }
-    // Render a page with the list of tests
-    res.render('my-tests', { tests: rows }); // Assuming you have a my-tests.ejs template
+
+    const testsWithDetails = rows.map(test => ({
+      ...test,
+      language_from_details: getLanguageDetails(test.language_from),
+      language_to_details: getLanguageDetails(test.language_to)
+    }));
+
+    res.render('my-tests', { tests: testsWithDetails });
   });
 });
 
 app.get('/create-test', (req, res) => {
-  res.render('create-test');
+  const languages = ISO6391.getAllNames(); // Get all language names
+  res.render('create-test', { languages, getCode: ISO6391.getCode });
 });
 
 
 app.post('/create-test', (req, res) => {
   // Extract test data from the request body
-  const { user_id, test_name, language_from, language_to } = req.body;
-
+  const { test_name, language_from, language_to } = req.body;
+  const user_id = req.session.userId;
+  console.log('Request Body:', req.body, 'User ID:', user_id);
   // SQL to insert a new test into the tests table
   const sql = `INSERT INTO tests (user_id, test_name, language_from, language_to) VALUES (?, ?, ?, ?)`;
 
