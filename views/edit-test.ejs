@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Include your head content like CSS links -->
+</head>
+<body>
+  <h1>Edit Test: <%= test.test_name %></h1>
+  <form action="/edit-test/<%= test.id %>" method="post">
+    <input type="text" name="test_name" value="<%= test.test_name %>" required>
+    <!-- Add inputs/selects for language_from and language_to, pre-populated with current values -->
+
+    <% entries.forEach(entry => { %>
+      <div>
+        <input type="text" name="word_or_sentence_from" value="<%= entry.word_or_sentence_from %>">
+        <input type="text" name="word_or_sentence_to" value="<%= entry.word_or_sentence_to %>">
+        <!-- Add a delete button/link for each entry -->
+      </div>
+    <% }) %>
+
+    <!-- JavaScript to add more entries dynamically -->
+    <div id="newEntries"></div>
+    <button type="button" onclick="addEntry()">Add Entry</button>
+    <button type="submit">Save Changes</button>
+  </form>
+
+  <script>
+    function addEntry() {
+      // JavaScript to dynamically add new entry inputs
+    }
+  </script>
+</body>
+</html>

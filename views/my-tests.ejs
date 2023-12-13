@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Include your head content like CSS links -->
+</head>
+<body>
+  <h1>My Tests</h1>
+  <a href="/create-test">Create New Test</a>
+  <ul>
+    <% tests.forEach(test => { %>
+      <li>
+        <%= test.test_name %> - <%= test.language_from %> to <%= test.language_to %>
+        <a href="/edit-test/<%= test.id %>">Edit</a>
+        <form action="/delete-test/<%= test.id %>" method="post">
+          <button type="submit">Delete</button>
+        </form>
+      </li>
+    <% }) %>
+  </ul>
+</body>
+</html>

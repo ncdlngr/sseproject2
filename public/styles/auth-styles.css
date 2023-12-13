@@ -1,0 +1,38 @@
+/* auth-styles.css */
+body {
+    background-color: #f4ece2; /* Choose your preferred color palette */
+  }
+  .auth-container {
+    max-width: 400px;
+    margin: 50px auto;
+    background-color: #002244; /* Dark blue background */
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  }
+  .auth-form .form-control {
+    background-color: transparent;
+    border: none;
+    border-bottom: 1px solid #aaa; /* Light gray bottom border */
+    border-radius: 0;
+    box-shadow: none;
+    color: white; /* White text color */
+  }
+  .auth-form label {
+    color: #aaa; /* Light gray label color */
+  }
+  .auth-form button {
+    background-color: #5cb85c; /* Bootstrap 'btn-success' green */
+    border: none;
+    margin-top: 20px;
+  }
+  .auth-form button:hover {
+    background-color: #4cae4c; /* Darker green on hover */
+  }
+  .auth-form .btn-link {
+    color: #dcdcdc; /* Light gray link color */
+  }
+  .auth-form .btn-link:hover {
+    color: #fff; /* White link color on hover */
+  }
+  
