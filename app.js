@@ -356,10 +356,18 @@ app.post('/submit-test/:testId', (req, res) => {
     }
 
     let score = 0;
-    userAnswers.forEach((answer, index) => {
-      if (index < correctAnswers.length && answer.trim().toLowerCase() === correctAnswers[index].word_or_sentence_to.trim().toLowerCase()) {
+    const detailedResults = correctAnswers.map((answer, index) => {
+      const userAnswer = userAnswers[index] || '';
+      const isCorrect = userAnswer.trim().toLowerCase() === answer.word_or_sentence_to.trim().toLowerCase();
+      if (isCorrect) {
         score++;
       }
+      return {
+        question: answer.word_or_sentence_from,
+        correctAnswer: answer.word_or_sentence_to,
+        userAnswer,
+        isCorrect
+      };
     });
 
     const totalQuestions = correctAnswers.length;
@@ -378,7 +386,8 @@ app.post('/submit-test/:testId', (req, res) => {
       res.render('test-results', {
         score: score,
         totalQuestions: totalQuestions,
-        percentage: percentage
+        percentage: percentage,
+        detailedResults: detailedResults
       });
     });
   });

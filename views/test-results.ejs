@@ -10,29 +10,26 @@
   <link rel="stylesheet" href="/styles/auth-styles.css">
 </head>
 <body>
-  <div class="container mt-5">
-    <div class="card">
-      <div class="card-header">
+    <div class="container mt-5">
         <h1>Test Results</h1>
+        <p>Your Score: <%= score %> out of <%= totalQuestions %></p>
+        <p>Your Percentage: <%= percentage.toFixed(2) %>%</p>
+    
+        <ul class="list-group">
+          <% detailedResults.forEach(result => { %>
+            <li class="list-group-item">
+              <strong>Question:</strong> <%= result.question %><br>
+              <strong>Your Answer:</strong> <%= result.userAnswer %><br>
+              <strong>Correct Answer:</strong> <%= result.correctAnswer %><br>
+              <span class="<%= result.isCorrect ? 'text-success' : 'text-danger' %>">
+                <%= result.isCorrect ? 'Correct' : 'Incorrect' %>
+              </span>
+            </li>
+          <% }); %>
+        </ul>
+    
+        <a href="/dashboard" class="btn btn-primary mt-3">Return to Dashboard</a>
       </div>
-      <div class="card-body">
-        <h3 class="card-title">Your Score: <%= score %> out of <%= totalQuestions %></h3>
-        <div class="progress mb-3">
-        <div class="progress-bar" role="progressbar" style="width: <%= percentage %>%;" aria-valuenow="<%= percentage %>" aria-valuemin="0" aria-valuemax="100"></div>
-        </div>
-        <p class="card-text">
-          <% if(percentage >= 80) { %>
-            Excellent work! You're doing great.
-          <% } else if(percentage >= 50) { %>
-            Good job! There's room for improvement.
-          <% } else { %>
-            Keep practicing, you'll improve!
-          <% } %>
-        </p>
-        <a href="/dashboard" class="btn btn-primary">Return to Dashboard</a>
-      </div>
-    </div>
-  </div>
 
   <!-- Bootstrap JS Bundle CDN -->
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
