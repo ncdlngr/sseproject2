@@ -20,6 +20,7 @@ app.use(
   })
 );
 app.use(express.static('public'));
+app.use(express.json());
 
 
 function getCountryCodeForLanguage(languageCode) {
@@ -266,14 +267,17 @@ app.post('/delete-entry/:entryId', (req, res) => {
   db.run("DELETE FROM entries WHERE id = ?", [entryId], err => {
     if (err) {
       // Handle error
-      res.status(500).send("Error deleting entry");
+      console.error(err.message);
+      res.status(500).json({ error: "Error deleting entry" });
       return;
     }
 
-    // Redirect back to the test editing page or handle the response appropriately
-    res.redirect('/edit-test/' + req.body.testId); // Assuming testId is sent in the request body
+    // Send a JSON response indicating success
+    res.json({ success: true, message: "Entry deleted successfully", testId: req.body.testId });
   });
 });
+
+
 
 
 

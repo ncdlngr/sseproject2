@@ -10,82 +10,101 @@
   <link rel="stylesheet" href="/styles/auth-styles.css">
 </head>
 <body>
-  <div class="container mt-5">
-    <h1 class="mb-4">Edit Test: <%= test.test_name %></h1>
-    <form action="/edit-test/<%= test.id %>" method="post">
-      <div class="form-group">
-        <label for="test_name">Test Name</label>
-        <input type="text" class="form-control" id="test_name" name="test_name" value="<%= test.test_name %>" required>
-      </div>
-
-      <div class="form-row">
-        <div class="form-group col-md-6">
-          <label for="language_from">From Language</label>
-          <select id="language_from" name="language_from" class="form-control" required>
-            <% languageOptions.forEach(option => { %>
-              <option value="<%= option.code %>" <%= test.language_from === option.code ? 'selected' : '' %>><%= option.name %></option>
-            <% }); %>
-          </select>
-        </div>
-
-        <div class="form-group col-md-6">
-          <label for="language_to">To Language</label>
-          <select id="language_to" name="language_to" class="form-control" required>
-            <% languageOptions.forEach(option => { %>
-              <option value="<%= option.code %>" <%= test.language_to === option.code ? 'selected' : '' %>><%= option.name %></option>
-            <% }); %>
-          </select>
-        </div>
-      </div>
-
-      <div id="entries">
-        <% entries.forEach(entry => { %>
-          <div class="form-row align-items-end mb-3">
-            <input type="hidden" name="entry_ids[]" value="<%= entry.id %>">
-            <div class="col">
-              <input type="text" class="form-control" name="word_or_sentence_from" value="<%= entry.word_or_sentence_from %>" placeholder="Word/Sentence From">
+    <div class="container mt-5">
+        <h1 class="mb-4">Edit Test: <%= test.test_name %></h1>
+        <form action="/edit-test/<%= test.id %>" method="post">
+          <div class="form-group">
+            <label for="test_name">Test Name</label>
+            <input type="text" class="form-control" id="test_name" name="test_name" value="<%= test.test_name %>" required>
+          </div>
+    
+          <div class="form-row">
+            <div class="form-group col-md-6">
+              <label for="language_from">From Language</label>
+              <select id="language_from" name="language_from" class="form-control" required>
+                <% languageOptions.forEach(option => { %>
+                  <option value="<%= option.code %>" <%= test.language_from === option.code ? 'selected' : '' %>><%= option.name %></option>
+                <% }); %>
+              </select>
             </div>
-            <div class="col">
-              <input type="text" class="form-control" name="word_or_sentence_to" value="<%= entry.word_or_sentence_to %>" placeholder="Translation">
-            </div>
-            <div class="col-auto">
-              <button type="button" class="btn btn-danger" onclick="deleteEntry(this)">Delete</button>
+    
+            <div class="form-group col-md-6">
+              <label for="language_to">To Language</label>
+              <select id="language_to" name="language_to" class="form-control" required>
+                <% languageOptions.forEach(option => { %>
+                  <option value="<%= option.code %>" <%= test.language_to === option.code ? 'selected' : '' %>><%= option.name %></option>
+                <% }); %>
+              </select>
             </div>
           </div>
-        <% }) %>
+    
+          <div id="entries">
+            <% entries.forEach(entry => { %>
+                <div class="form-row align-items-end mb-3">
+                  <input type="hidden" name="entry_ids[]" value="<%= entry.id %>">
+                  <div class="col">
+                    <input type="text" class="form-control" name="word_or_sentence_from[]" value="<%= entry.word_or_sentence_from %>" placeholder="Word/Sentence From">
+                  </div>
+                  <div class="col">
+                    <input type="text" class="form-control" name="word_or_sentence_to[]" value="<%= entry.word_or_sentence_to %>" placeholder="Translation">
+                  </div>
+                  <div class="col-auto">
+                    <button type="button" class="btn btn-danger" onclick="deleteEntry('<%= entry.id %>', '<%= test.id %>')">Delete</button>
+                  </div>
+                </div>
+              <% }) %>
+              
+          </div>
+    
+          <button type="button" class="btn btn-secondary mb-3" onclick="addEntry()">Add Entry</button>
+          <button type="submit" class="btn btn-primary">Save Changes</button>
+        </form>
       </div>
+    
+      <!-- Bootstrap JS Bundle CDN -->
+      <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+    
+      <script>
+        function addEntry() {
+          var container = document.getElementById('entries');
+          var newRow = document.createElement('div');
+          newRow.className = 'form-row align-items-end mb-3';
+          newRow.innerHTML = `
+            <input type="hidden" name="entry_ids[]" value="">
+            <div class="col">
+              <input type="text" class="form-control" name="word_or_sentence_from[]" placeholder="Word/Sentence From">
+            </div>
+            <div class="col">
+              <input type="text" class="form-control" name="word_or_sentence_to[]" placeholder="Translation">
+            </div>
+          `;
+          container.appendChild(newRow);
+        }
 
-      <button type="button" class="btn btn-secondary mb-3" onclick="addEntry()">Add Entry</button>
-      <button type="submit" class="btn btn-primary">Save Changes</button>
-    </form>
-  </div>
-
-  <!-- Bootstrap JS Bundle CDN -->
-  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
-
-  <script>
-    function addEntry() {
-      var container = document.getElementById('entries');
-      var newRow = document.createElement('div');
-      newRow.className = 'form-row align-items-end mb-3';
-      newRow.innerHTML = `
-        <input type="hidden" name="entry_ids[]" value="">
-        <div class="col">
-          <input type="text" class="form-control" name="word_or_sentence_from" placeholder="Word/Sentence From">
-        </div>
-        <div class="col">
-          <input type="text" class="form-control" name="word_or_sentence_to" placeholder="Translation">
-        </div>
-        <div class="col-auto">
-          <button type="button" class="btn btn-danger" onclick="deleteEntry(this)">Delete</button>
-        </div>
-      `;
-      container.appendChild(newRow);
-    }
-
-    function deleteEntry(button) {
-      button.parentElement.parentElement.remove();
-    }
-  </script>
-</body>
-</html>
+        function deleteEntry(entryId, testId) {
+            fetch('/delete-entry/' + entryId, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json' // Make sure to accept JSON response
+              },
+              body: JSON.stringify({ testId: testId })
+            })
+            .then(response => response.json())
+            .then(data => {
+              if (data.success) {
+                window.location.href = '/edit-test/' + testId; // Perform redirect on client side
+              } else {
+                console.error(data.error);
+              }
+            })
+            .catch(error => {
+              console.error('There has been a problem with your fetch operation:', error);
+            });
+          }
+          
+          
+      </script>
+      
+    </body>
+    </html>
