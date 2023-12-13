@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Results</title>
+  <!-- Bootstrap CSS CDN -->
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Optional: Custom Styles -->
+  <link rel="stylesheet" href="/styles/auth-styles.css">
+</head>
+<body>
+  <div class="container mt-5">
+    <div class="card">
+      <div class="card-header">
+        <h1>Test Results</h1>
+      </div>
+      <div class="card-body">
+        <h3 class="card-title">Your Score: <%= score %> out of <%= totalQuestions %></h3>
+        <div class="progress mb-3">
+        <div class="progress-bar" role="progressbar" style="width: <%= percentage %>%;" aria-valuenow="<%= percentage %>" aria-valuemin="0" aria-valuemax="100"></div>
+        </div>
+        <p class="card-text">
+          <% if(percentage >= 80) { %>
+            Excellent work! You're doing great.
+          <% } else if(percentage >= 50) { %>
+            Good job! There's room for improvement.
+          <% } else { %>
+            Keep practicing, you'll improve!
+          <% } %>
+        </p>
+        <a href="/dashboard" class="btn btn-primary">Return to Dashboard</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS Bundle CDN -->
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

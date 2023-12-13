@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Run Test: <%= test.test_name %></title>
+  <!-- Bootstrap CSS CDN -->
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Optional: Custom Styles -->
+  <link rel="stylesheet" href="/styles/auth-styles.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="card">
+          <div class="card-header">
+            <h1 class="card-title">Run Test: <%= test.test_name %></h1>
+            <h5>Translate from <%= test.language_from_details.name %> to <%= test.language_to_details.name %></h5>
+          </div>
+          <div class="card-body">
+            <form id="testForm" action="/submit-test/<%= test.id %>" method="post">
+              <% for(let i = 0; i < entries.length; i++) { %>
+                <div class="test-entry card mb-3" id="entry<%= i %>" <% if (i !== 0) { %>style="display: none;"<% } %>>
+                  <div class="card-body">
+                    <p class="card-text">
+                      <strong>Question <%= i + 1 %> of <%= entries.length %>:</strong> Translate <%= entries[i].word_or_sentence_from %>
+                    </p>
+                    <input type="text" class="form-control mb-3" name="answers[<%= entries[i].id %>]" placeholder="Your answer">
+                    <div class="d-flex justify-content-between">
+                      <% if (i > 0) { %>
+                        <button type="button" class="btn btn-info prev-button" data-index="<%= i - 1 %>">Previous</button>
+                      <% } else { %>
+                        <button type="button" class="btn btn-info" disabled>Previous</button>
+                      <% } %>
+                      <% if (i < entries.length - 1) { %>
+                        <button type="button" class="btn btn-primary next-button" data-index="<%= i + 1 %>">Next</button>
+                      <% } else { %>
+                        <button type="submit" class="btn btn-success submit-button">Submit Test</button>
+                      <% } %>
+                    </div>
+                  </div>
+                </div>
+              <% } %>
+              <button type="button" class="btn btn-danger abort-button">Abort Test</button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+  <!-- Bootstrap JS Bundle CDN -->
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+
+      <script>
+        document.addEventListener('DOMContentLoaded', (event) => {
+          // Add event listeners to previous/next buttons
+          document.querySelectorAll('.prev-button, .next-button').forEach(button => {
+            button.addEventListener('click', function() {
+              const index = parseInt(this.getAttribute('data-index'));
+              showEntry(index);
+            });
+          });
+      
+          // If there is a submit button, add event listener
+          const submitButton = document.querySelector('.submit-button');
+          if(submitButton) {
+            submitButton.addEventListener('click', function() {
+              submitTest();
+            });
+          }
+      
+          // Add event listener to abort button
+          document.querySelector('.abort-button').addEventListener('click', function() {
+            abortTest();
+          });
+        });
+      
+        function showEntry(index) {
+          // Hide all entries
+          document.querySelectorAll('.test-entry').forEach(entry => {
+            entry.style.display = 'none';
+          });
+          // Show the current entry
+          const entryToShow = document.getElementById('entry' + index);
+          if(entryToShow) {
+            entryToShow.style.display = 'block';
+          }
+        }
+      
+        function submitTest() {
+          // Implement the logic to handle test submission, for example:
+          const form = document.getElementById('testForm');
+          form.submit(); // This will submit the form
+        }
+      
+        function abortTest() {
+          window.location.href = '/dashboard'; // Redirect to the dashboard
+        }
+      </script>
+      
+  
+</body>
+</html>
