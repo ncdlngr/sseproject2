@@ -7,7 +7,7 @@
   <!-- Bootstrap CSS CDN -->
   <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
   <!-- Optional: Custom Styles -->
-  <link rel="stylesheet" href="/styles/auth-styles.css">
+  <link rel="stylesheet" href="/styles/test-results-styles.css">
 </head>
 <body>
     <div class="container mt-5">
@@ -18,7 +18,7 @@
         <ul class="list-group">
           <% detailedResults.forEach(result => { %>
             <li class="list-group-item">
-              <strong>Question:</strong> <%= result.question %><br>
+              <strong>Question: </strong> <%= result.question %><br>
               <strong>Your Answer:</strong> <%= result.userAnswer %><br>
               <strong>Correct Answer:</strong> <%= result.correctAnswer %><br>
               <span class="<%= result.isCorrect ? 'text-success' : 'text-danger' %>">
@@ -27,7 +27,7 @@
             </li>
           <% }); %>
         </ul>
-    
+        <a href="/run-test/<%= test.id %>" class="btn btn-secondary">Retake Test</a>
         <a href="/dashboard" class="btn btn-primary mt-3">Return to Dashboard</a>
       </div>
 

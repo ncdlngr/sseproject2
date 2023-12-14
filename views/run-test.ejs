@@ -7,7 +7,7 @@
   <!-- Bootstrap CSS CDN -->
   <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
   <!-- Optional: Custom Styles -->
-  <link rel="stylesheet" href="/styles/auth-styles.css">
+  <link rel="stylesheet" href="/styles/run-test-styles.css">
 </head>
 <body>
     <div class="container mt-5">
@@ -22,7 +22,7 @@
                 <div class="test-entry card mb-3" id="entry<%= i %>" <% if (i !== 0) { %>style="display: none;"<% } %>>
                   <div class="card-body">
                     <p class="card-text">
-                      <strong>Question <%= i + 1 %> of <%= entries.length %>:</strong> Translate <%= entries[i].word_or_sentence_from %>
+                      <strong>Question <%= i + 1 %> of <%= entries.length %>:</strong> Translate <b>"<%= entries[i].word_or_sentence_from %>"</b> to <%= test.language_to_details.name %>
                     </p>
                     <input type="text" class="form-control mb-3" name="answers[<%= entries[i].id %>]" placeholder="Your answer">
                     <div class="d-flex justify-content-between">

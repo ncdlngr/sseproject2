@@ -1,0 +1,59 @@
+/* run-test-styles.css */
+/* Form and Card styles */
+.card {
+  border-color: #002244; /* Dark blue border */
+}
+
+.card-header {
+  background-color: #002244; /* Dark blue header */
+  color: #ffffff; /* White text */
+}
+
+.card-body {
+  background-color: #e7e7e7; /* Light gray body */
+}
+
+.form-control {
+  background-color: #ffffff; /* White background for input */
+  border-color: #d1d1d1; /* Gray border */
+}
+
+.form-control:focus {
+  border-color: #002244; /* Dark blue border on focus */
+  box-shadow: 0 0 0 0.2rem rgba(0, 34, 68, 0.25); /* Blue glow */
+}
+
+/* Button styles */
+.btn-info {
+  background-color: #17a2b8; /* Bootstrap 'btn-info' teal */
+}
+
+.btn-info:hover {
+  background-color: #138496; /* Darker teal on hover */
+}
+
+.btn-primary {
+  background-color: #002244; /* Dark blue for primary buttons */
+}
+
+.btn-primary:hover {
+  background-color: #001833; /* Slightly darker blue on hover */
+}
+
+.btn-success {
+  background-color: #28a745; /* Bootstrap 'btn-success' green */
+}
+
+.btn-success:hover {
+  background-color: #218838; /* Darker green on hover */
+}
+
+.btn-danger {
+  background-color: #FF6B6B; /* Coral color for danger buttons */
+}
+
+.btn-danger:hover {
+  background-color: #ff5a5a; /* Slightly darker coral on hover */
+}
+
+/* Additional styling adjustments as needed */

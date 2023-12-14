@@ -1,0 +1,36 @@
+/* create-test-styles.css */
+.container {
+    background-color: #e7e7e7; /* Light gray background */
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  }
+  
+  h1 {
+    color: #002244; /* Dark blue color for heading */
+  }
+  
+  .form-group label {
+    color: #002244; /* Dark blue for labels */
+  }
+  
+  .form-control {
+    background-color: #f8f9fa; /* Slightly off-white background for inputs */
+    border: 1px solid #ced4da; /* Light gray border */
+    color: #495057; /* Dark gray text color */
+  }
+  
+  .form-control:focus {
+    border-color: #80bdff; /* Light blue border on focus */
+    box-shadow: 0 0 0 0.2rem rgba(0, 34, 68, 0.25); /* Light blue shadow on focus */
+  }
+  
+  .btn-primary {
+    background-color: #002244; /* Dark blue for primary buttons */
+    border-color: #001833; /* Slightly darker blue for border */
+  }
+  
+  .btn-primary:hover {
+    background-color: #001833; /* Slightly darker blue on hover */
+  }
+  

@@ -1,0 +1,51 @@
+/* test-results-styles.css */
+/* General container and heading styles */
+.container {
+    background-color: #e7e7e7; /* Light gray background */
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  }
+  
+  h1 {
+    color: #002244; /* Dark blue color for heading */
+  }
+  
+  /* Score and Percentage styles */
+  p {
+    color: #333333; /* Dark text for readability */
+  }
+  
+  /* List styles */
+  .list-group-item {
+    background-color: #ffffff; /* White background for list items */
+    border-color: #d1d1d1; /* Gray border */
+  }
+  
+  .text-success {
+    color: #28a745; /* Bootstrap 'success' green */
+  }
+  
+  .text-danger {
+    color: #FF6B6B; /* Coral color for danger text */
+  }
+  
+  /* Button styles */
+  .btn-primary {
+    background-color: #002244; /* Dark blue for primary buttons */
+  }
+  
+  .btn-primary:hover {
+    background-color: #001833; /* Slightly darker blue on hover */
+  }
+  
+  .btn-secondary {
+    background-color: #6c757d; /* Bootstrap 'secondary' gray */
+  }
+  
+  .btn-secondary:hover {
+    background-color: #5a6268; /* Darker gray on hover */
+  }
+  
+  /* Additional styling adjustments as needed */
+  

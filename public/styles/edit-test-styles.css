@@ -1,0 +1,45 @@
+/* edit-test-styles.css */
+/* This file should be linked in your edit-test.ejs */
+
+/* Form styles */
+.form-control {
+    background-color: #e7e7e7; /* Light gray background for input */
+    border-color: #d1d1d1; /* Gray border */
+  }
+  
+  .form-control:focus {
+    border-color: #002244; /* Dark blue border on focus */
+    box-shadow: 0 0 0 0.2rem rgba(0, 34, 68, 0.25); /* Blue glow */
+  }
+  
+  .form-group label {
+    color: #002244; /* Dark blue text for labels */
+  }
+  
+  /* Button styles */
+  .btn-secondary {
+    background-color: #6c757d; /* Gray color for secondary buttons */
+  }
+  
+  .btn-secondary:hover {
+    background-color: #5a6268; /* Slightly darker gray on hover */
+  }
+  
+  .btn-primary {
+    background-color: #002244; /* Dark blue for primary buttons */
+  }
+  
+  .btn-primary:hover {
+    background-color: #001833; /* Slightly darker blue on hover */
+  }
+  
+  .btn-danger {
+    background-color: #FF6B6B; /* Coral color for danger buttons */
+  }
+  
+  .btn-danger:hover {
+    background-color: #ff5a5a; /* Slightly darker coral on hover */
+  }
+  
+  /* Additional styling adjustments as needed */
+  

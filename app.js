@@ -342,56 +342,90 @@ app.get("/run-test/:testId", (req, res) => {
   });
 });
 
-app.post('/submit-test/:testId', (req, res) => {
-  const testId = req.params.testId;
-  const userId = req.session.userId;
-  const userAnswers = req.body.answers; // This is an array of answers
+app.get('/run-random-test', (req, res) => {
+  const userId = req.session.userId; // Assuming user ID is stored in the session
 
-  // Fetch the correct answers in the same order as they were in the test
-  db.all("SELECT word_or_sentence_to FROM entries WHERE test_id = ? ORDER BY id", [testId], (err, correctAnswers) => {
+  db.all("SELECT id FROM tests WHERE user_id = ?", [userId], (err, tests) => {
     if (err) {
       console.error(err.message);
-      res.status(500).send("Error retrieving correct answers");
+      res.status(500).send("Error retrieving tests");
       return;
     }
 
-    let score = 0;
-    const detailedResults = correctAnswers.map((answer, index) => {
-      const userAnswer = userAnswers[index] || '';
-      const isCorrect = userAnswer.trim().toLowerCase() === answer.word_or_sentence_to.trim().toLowerCase();
-      if (isCorrect) {
-        score++;
-      }
-      return {
-        question: answer.word_or_sentence_from,
-        correctAnswer: answer.word_or_sentence_to,
-        userAnswer,
-        isCorrect
-      };
-    });
+    if (tests.length > 0) {
+      // Select a random test
+      const randomTest = tests[Math.floor(Math.random() * tests.length)];
+      // Redirect to the test-running page for this test
+      res.redirect(`/run-test/${randomTest.id}`);
+    } else {
+      // Handle the case where the user has no tests
+      res.redirect('/dashboard'); // or show a message that no tests are available
+    }
+  });
+});
 
-    const totalQuestions = correctAnswers.length;
-    const percentage = (score / totalQuestions) * 100;
 
-    // Save the test results to the database
-    const insertSql = "INSERT INTO test_results (user_id, test_id, score, total_questions, percentage) VALUES (?, ?, ?, ?, ?)";
-    db.run(insertSql, [userId, testId, score, totalQuestions, percentage], insertErr => {
-      if (insertErr) {
-        console.error(insertErr.message);
-        res.status(500).send("Error saving test results");
+app.post('/submit-test/:testId', (req, res) => {
+  const testId = req.params.testId;
+  const userId = req.session.userId;
+  const userAnswers = req.body.answers;
+
+  // First, retrieve the test details
+  db.get("SELECT * FROM tests WHERE id = ?", [testId], (testErr, test) => {
+    if (testErr) {
+      console.error(testErr.message);
+      res.status(500).send("Error retrieving test details");
+      return;
+    }
+
+    // Then, get all the correct answers for this test
+    db.all("SELECT id, word_or_sentence_from, word_or_sentence_to FROM entries WHERE test_id = ? ORDER BY id", [testId], (err, correctAnswers) => {
+      if (err) {
+        console.error(err.message);
+        res.status(500).send("Error retrieving correct answers");
         return;
       }
 
-      // Render the results page or redirect
-      res.render('test-results', {
-        score: score,
-        totalQuestions: totalQuestions,
-        percentage: percentage,
-        detailedResults: detailedResults
+      let score = 0;
+      const detailedResults = correctAnswers.map((answer, index) => {
+        const userAnswer = userAnswers[index] || '';
+        const isCorrect = userAnswer.trim().toLowerCase() === answer.word_or_sentence_to.trim().toLowerCase();
+        if (isCorrect) {
+          score++;
+        }
+        return {
+          question: answer.word_or_sentence_from,
+          correctAnswer: answer.word_or_sentence_to,
+          userAnswer,
+          isCorrect
+        };
+      });
+
+      const totalQuestions = correctAnswers.length;
+      const percentage = (score / totalQuestions) * 100;
+
+      // Save the test results to the database
+      const insertSql = "INSERT INTO test_results (user_id, test_id, score, total_questions, percentage) VALUES (?, ?, ?, ?, ?)";
+      db.run(insertSql, [userId, testId, score, totalQuestions, percentage], insertErr => {
+        if (insertErr) {
+          console.error(insertErr.message);
+          res.status(500).send("Error saving test results");
+          return;
+        }
+
+        // Render the results page with detailed results and test information
+        res.render('test-results', {
+          score: score,
+          totalQuestions: totalQuestions,
+          percentage: percentage,
+          detailedResults: detailedResults,
+          test: test // Include the test object
+        });
       });
     });
   });
 });
+
 
 
 app.post("/logout", (req, res) => {
