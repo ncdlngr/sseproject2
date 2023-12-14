@@ -3,7 +3,6 @@ import bcrypt from "bcrypt";
 import db from "./database.js";
 import session from "express-session";
 import "dotenv/config";
-import e from "express";
 import ISO6391 from "iso-639-1";
 import languageCountryMapping from "./languagemapping.js";
 

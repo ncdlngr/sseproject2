@@ -1,5 +1,4 @@
 /* my-tests-styles.css */
-/* Assuming this file is linked in your my-tests.ejs */
 
 /* Table styles */
 .table thead th {
@@ -35,6 +34,5 @@
   .btn-primary:hover {
     background-color: #001833; /* Slightly darker blue on hover */
   }
-  
-  /* Other styling adjustments as needed */
+
   
