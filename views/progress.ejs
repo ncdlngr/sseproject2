@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <!-- Bootstrap 4 CSS -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="/styles/nav-styles.css">
+</head>
+<body>
+      <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <a class="navbar-brand" href="#">LanguageApp</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNavDropdown">
+      <ul class="navbar-nav mr-auto">
+        <li class="nav-item">
+          <a class="nav-link" href="/dashboard">Dashboard</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/my-tests">My Tests</a>
+        </li>
+        <li class="nav-item active">
+          <a class="nav-link" href="/progress">Progress</a>
+        </li>
+      </ul>
+      <form class="form-inline my-2 my-lg-0">
+        <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
+        <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+      </form>
+      <ul class="navbar-nav">
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <i class="fa fa-user-circle" aria-hidden="true"></i> Profile
+          </a>
+          <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+            <a class="dropdown-item" href="/profile">Settings</a>
+            <a class="dropdown-item" href="/logout">Logout</a>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </nav>
+  <div class="container mt-5">
+    <h1 class="page-title">Progress Overview</h1>
+    <p class="page-description">Track your learning journey and see how you've improved.</p>
+  
+    <!-- Charts Section -->
+    <div class="charts-section">
+      <div class="chart-container">
+        <h2>Score Over Time</h2>
+        <canvas id="scoreChart"></canvas>
+      </div>
+      <div class="chart-container">
+        <h2>Percentage Over Time</h2>
+        <canvas id="percentageChart"></canvas>
+      </div>
+    </div>
+  
+    <!-- Detailed Statistics Section -->
+    <div class="statistics-section">
+        <h2>Statistics</h2>
+        <div class="statistic-item">
+          <strong>Average Score:</strong> <%= averageScore.toFixed(2) %>
+        </div>
+        <div class="statistic-item">
+          <strong>Total Tests Taken:</strong> <%= totalTests %>
+        </div>
+        <div class="statistic-item">
+          <strong>Highest Score:</strong> <%= highestScore %>
+        </div>
+        <div class="statistic-item">
+          <strong>Lowest Score:</strong> <%= lowestScore %>
+        </div>
+    </div>
+  
+    <!-- Recent Tests Section -->
+    <div class="recent-tests-section">
+      <!-- Populate with dynamic data -->
+    </div>
+  
+    <!-- Suggestions for Improvement -->
+    <div class="suggestions-section">
+      <!-- Dynamic suggestions based on performance -->
+    </div>
+  </div>
+      <div id="testResultsData" style="display: none;">
+        <%- JSON.stringify(results) %>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        const scoreCtx = document.getElementById('scoreChart').getContext('2d');
+        const percentageCtx = document.getElementById('percentageChart').getContext('2d');
+        const testResultsData = document.getElementById('testResultsData').innerText;
+        const testResults = JSON.parse(testResultsData);
+
+      const scoreData = {
+        labels: testResults.map(result => result.date_taken.substring(0, 10)),
+        datasets: [{
+          label: 'Scores',
+          data: testResults.map(result => result.score),
+          backgroundColor: 'rgba(54, 162, 235, 0.2)',
+          borderColor: 'rgba(54, 162, 235, 1)',
+          borderWidth: 1
+        }]
+      };
+    
+      const percentageData = {
+        labels: testResults.map(result => result.date_taken.substring(0, 10)),
+        datasets: [{
+          label: 'Percentage',
+          data: testResults.map(result => result.percentage),
+          backgroundColor: 'rgba(255, 206, 86, 0.2)',
+          borderColor: 'rgba(255, 206, 86, 1)',
+          borderWidth: 1
+        }]
+      };
+      
+        // Initialize charts
+        const scoreChart = new Chart(scoreCtx, {
+          type: 'line', // or 'bar', 'radar', etc.
+          data: scoreData,
+          options: {}
+        });
+      
+        const percentageChart = new Chart(percentageCtx, {
+          type: 'line', // or 'bar', 'radar', etc.
+          data: percentageData,
+          options: {}
+        });
+      </script>
+      
+</body>
+</html>

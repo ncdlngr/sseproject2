@@ -425,6 +425,40 @@ app.post('/submit-test/:testId', (req, res) => {
   });
 });
 
+app.get('/progress', (req, res) => {
+  const userId = req.session.userId;
+  // SQL to fetch test results for the current user
+  const sql = "SELECT * FROM test_results WHERE user_id = ?";
+  db.all(sql, [userId], (err, results) => {
+    if (err) {
+      console.error(err.message);
+      res.status(500).send("Error retrieving progress data");
+      return;
+    }
+
+    // Calculate statistics
+    let totalScore = 0;
+    let highestScore = 0;
+    let lowestScore = results[0] ? results[0].score : 0;
+
+    results.forEach(result => {
+      totalScore += result.score;
+      if (result.score > highestScore) highestScore = result.score;
+      if (result.score < lowestScore) lowestScore = result.score;
+    });
+
+    const averageScore = totalScore / results.length;
+    const totalTests = results.length;
+
+    // Pass the results to the frontend
+    res.render('progress', { results, averageScore, 
+      totalTests, 
+      highestScore, 
+      lowestScore });
+  });
+});
+
+
 
 
 app.post("/logout", (req, res) => {

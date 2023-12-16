@@ -24,6 +24,7 @@ LanguageApp ist eine webbasierte Anwendung, die für Sprachlernende entwickelt w
 - **Fortschrittsverfolgung**: Ein Fortschrittsbereich für die zukünftige Implementierung, der darauf abzielt, Benutzerstatistiken und Erfolge anzuzeigen.
 - **User Profil**: Profilseite, auf der Nutzer Ihre Profildetails abrufen und gegebenenfalls Editieren können
 - **Robuste Sicherheitsmechanismen:** Input Validation, XSS-Protection, SQL-Injection Protection, erweitertes Session Management usw.
+- LOGOUT!!!
 
 ## Benutzerhandbuch
 
