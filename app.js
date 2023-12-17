@@ -65,6 +65,7 @@ app.post("/register", async (req, res) => {
       (err) => {
         if (err) {
           // handle error, e.g., username already exists
+          
           return res.redirect("/register");
         }
         res.redirect("/login");
@@ -427,8 +428,15 @@ app.post('/submit-test/:testId', (req, res) => {
 
 app.get('/progress', (req, res) => {
   const userId = req.session.userId;
-  // SQL to fetch test results for the current user
-  const sql = "SELECT * FROM test_results WHERE user_id = ?";
+
+  // SQL to join tests and test_results tables
+  const sql = `
+    SELECT test_results.*, tests.test_name 
+    FROM test_results 
+    JOIN tests ON test_results.test_id = tests.id 
+    WHERE test_results.user_id = ? 
+    ORDER BY test_results.date_taken DESC`;
+
   db.all(sql, [userId], (err, results) => {
     if (err) {
       console.error(err.message);
@@ -436,32 +444,29 @@ app.get('/progress', (req, res) => {
       return;
     }
 
-    // Calculate statistics
-    let totalScore = 0;
-    let highestScore = 0;
-    let lowestScore = results[0] ? results[0].score : 0;
+    let totalScore = 0, highestScore = 0, lowestScore = results[0] ? results[0].score : 0;
 
     results.forEach(result => {
       totalScore += result.score;
-      if (result.score > highestScore) highestScore = result.score;
-      if (result.score < lowestScore) lowestScore = result.score;
+      highestScore = Math.max(highestScore, result.score);
+      lowestScore = Math.min(lowestScore, result.score);
     });
 
-    const averageScore = totalScore / results.length;
+    const averageScore = results.length > 0 ? totalScore / results.length : 0;
     const totalTests = results.length;
 
-    // Pass the results to the frontend
-    res.render('progress', { results, averageScore, 
+    // Pass the results and calculated statistics to the frontend
+    res.render('progress', { 
+      results, 
+      averageScore, 
       totalTests, 
       highestScore, 
-      lowestScore });
+      lowestScore 
+    });
   });
 });
 
-
-
-
-app.post("/logout", (req, res) => {
+app.get("/logout", (req, res) => {
   req.session.destroy((err) => {
     if (err) {
       return res.redirect("/dashboard");

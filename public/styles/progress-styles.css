@@ -1,0 +1,33 @@
+.statistics-section {
+    padding: 20px;
+    background-color: #f8f9fa; /* Light background */
+    border-radius: 10px;
+    margin-bottom: 20px;
+  }
+  
+  .statistics-section h2 {
+    margin-bottom: 15px;
+  }
+  
+  .statistic-item {
+    margin-bottom: 10px;
+    font-size: 16px;
+  }
+
+  .recent-tests-section {
+    padding: 20px;
+    background-color: #fff; /* White background */
+    border-radius: 10px;
+    margin-bottom: 20px;
+  }
+  
+  .recent-tests-section h2 {
+    margin-bottom: 15px;
+  }
+  
+  .recent-tests-section .list-group-item {
+    margin-bottom: 10px;
+    font-size: 14px;
+  }
+  
+  

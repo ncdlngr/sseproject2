@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
   <!-- Custom Styles -->
   <link rel="stylesheet" href="/styles/nav-styles.css">
+  <link rel="stylesheet" href="/styles/progress-styles.css">
 </head>
 <body>
       <!-- Navbar -->
@@ -50,15 +51,21 @@
     <p class="page-description">Track your learning journey and see how you've improved.</p>
   
     <!-- Charts Section -->
-    <div class="charts-section">
-      <div class="chart-container">
-        <h2>Score Over Time</h2>
-        <canvas id="scoreChart"></canvas>
-      </div>
-      <div class="chart-container">
-        <h2>Percentage Over Time</h2>
-        <canvas id="percentageChart"></canvas>
-      </div>
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="chart-container">
+                    <h2>Score Over Time</h2>
+                    <canvas id="scoreChart"></canvas>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="chart-container">
+                    <h2>Percentage Over Time</h2>
+                    <canvas id="percentageChart"></canvas>
+                </div>
+            </div>
+        </div>
     </div>
   
     <!-- Detailed Statistics Section -->
@@ -80,8 +87,18 @@
   
     <!-- Recent Tests Section -->
     <div class="recent-tests-section">
-      <!-- Populate with dynamic data -->
-    </div>
+        <h2>Recent Tests</h2>
+        <ul class="list-group">
+          <% results.forEach(result => { %>
+            <li class="list-group-item">
+              <strong>Test:</strong> <%= result.test_name %><br>
+              <strong>Date:</strong> <%= new Date(result.date_taken).toLocaleDateString() %><br>
+              <strong>Score:</strong> <%= result.score %>/<%= result.total_questions %><br>
+              <strong>Percentage:</strong> <%= result.percentage.toFixed(2) %>%
+            </li>
+          <% }) %>
+        </ul>
+      </div>
   
     <!-- Suggestions for Improvement -->
     <div class="suggestions-section">
@@ -99,40 +116,40 @@
     <script>
         const scoreCtx = document.getElementById('scoreChart').getContext('2d');
         const percentageCtx = document.getElementById('percentageChart').getContext('2d');
-        const testResultsData = document.getElementById('testResultsData').innerText;
+        const testResultsData = document.getElementById('testResultsData').textContent;
         const testResults = JSON.parse(testResultsData);
-
-      const scoreData = {
-        labels: testResults.map(result => result.date_taken.substring(0, 10)),
-        datasets: [{
-          label: 'Scores',
-          data: testResults.map(result => result.score),
-          backgroundColor: 'rgba(54, 162, 235, 0.2)',
-          borderColor: 'rgba(54, 162, 235, 1)',
-          borderWidth: 1
-        }]
-      };
-    
-      const percentageData = {
-        labels: testResults.map(result => result.date_taken.substring(0, 10)),
-        datasets: [{
-          label: 'Percentage',
-          data: testResults.map(result => result.percentage),
-          backgroundColor: 'rgba(255, 206, 86, 0.2)',
-          borderColor: 'rgba(255, 206, 86, 1)',
-          borderWidth: 1
-        }]
-      };
+      
+        const scoreData = {
+          labels: testResults.map(result => new Date(result.date_taken).toLocaleDateString()),
+          datasets: [{
+            label: 'Scores',
+            data: testResults.map(result => result.score),
+            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+            borderColor: 'rgba(54, 162, 235, 1)',
+            borderWidth: 1
+          }]
+        };
+      
+        const percentageData = {
+          labels: testResults.map(result => new Date(result.date_taken).toLocaleDateString()),
+          datasets: [{
+            label: 'Percentage',
+            data: testResults.map(result => result.percentage),
+            backgroundColor: 'rgba(255, 206, 86, 0.2)',
+            borderColor: 'rgba(255, 206, 86, 1)',
+            borderWidth: 1
+          }]
+        };
       
         // Initialize charts
-        const scoreChart = new Chart(scoreCtx, {
-          type: 'line', // or 'bar', 'radar', etc.
+        new Chart(document.getElementById('scoreChart').getContext('2d'), {
+          type: 'line',
           data: scoreData,
           options: {}
         });
       
-        const percentageChart = new Chart(percentageCtx, {
-          type: 'line', // or 'bar', 'radar', etc.
+        new Chart(document.getElementById('percentageChart').getContext('2d'), {
+          type: 'line',
           data: percentageData,
           options: {}
         });
