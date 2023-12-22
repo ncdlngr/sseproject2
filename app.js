@@ -5,6 +5,7 @@ import session from "express-session";
 import "dotenv/config";
 import ISO6391 from "iso-639-1";
 import languageCountryMapping from "./languagemapping.js";
+import { body, validationResult } from 'express-validator';
 
 const app = express();
 
@@ -32,6 +33,7 @@ function getLanguageDetails(languageCode) {
   return { name, countryCode };
 }
 
+
 // Routes
 
 app.get("/", (req, res) => {
@@ -57,24 +59,45 @@ app.get("/register", (req, res) => {
 
 // Route to handle registration form submission
 app.post("/register", async (req, res) => {
-  try {
-    const hashedPassword = await bcrypt.hash(req.body.password, 10);
-    db.run(
-      "INSERT INTO users (username, password) VALUES (?, ?)",
-      [req.body.username, hashedPassword],
-      (err) => {
-        if (err) {
-          // handle error, e.g., username already exists
-          
-          return res.redirect("/register");
+  const { username, password } = req.body;
+
+  // Validate username (e.g., length, allowed characters)
+  if (!username || username.length < 3 || username.length > 20) {
+    return res.status(400).send("Username must be between 3 and 20 characters");
+  }
+
+  // Validate password (e.g., minimum length, complexity)
+  if (!password || password.length < 6 || !/[A-Za-z]/.test(password) || !/[0-9]/.test(password)) {
+    return res.status(400).send("Password must be at least 6 characters long and include numbers and letters");
+  }
+
+  db.get("SELECT id FROM users WHERE username = ?", [username], async (err, row) => {
+    if (err) {
+      console.error(err.message);
+      return res.status(500).send("Error checking username");
+    }
+
+    if (row) {
+      return res.status(400).send("Username already exists");
+    }
+
+    // If username doesn't exist, proceed with hashing password and creating new user
+    try {
+      const hashedPassword = await bcrypt.hash(password, 10);
+      db.run("INSERT INTO users (username, password) VALUES (?, ?)", [username, hashedPassword], (insertErr) => {
+        if (insertErr) {
+          console.error(insertErr.message);
+          return res.status(500).send("Error creating user");
         }
         res.redirect("/login");
-      }
-    );
-  } catch {
-    res.redirect("/register");
-  }
+      });
+    } catch (hashErr) {
+      console.error(hashErr.message);
+      res.status(500).send("Error registering user");
+    }
+  });
 });
+
 
 // Route to display login form
 app.get("/login", (req, res) => {
@@ -82,23 +105,36 @@ app.get("/login", (req, res) => {
 });
 
 app.post("/login", (req, res) => {
+  const { username, password } = req.body;
+
+  // Basic validation
+  if (!username || !password) {
+    return res.status(400).send("Please enter both username and password");
+  }
+
   db.get(
     "SELECT * FROM users WHERE username = ?",
-    [req.body.username],
+    [username],
     async (err, user) => {
-      if (user && (await bcrypt.compare(req.body.password, user.password))) {
-        req.session.userId = user.id; // Storing user ID in session
-        res.redirect("/dashboard");
-      } else {
-        // Authentication failed
-        res.redirect("/login");
+      if (err) {
+        return res.status(500).send("Error logging in");
       }
+
+      if (!user || !(await bcrypt.compare(password, user.password))) {
+        return res.status(401).send("Incorrect username or password");
+      }
+
+      req.session.userId = user.id;
+      res.redirect("/dashboard");
     }
   );
 });
 
 app.get("/my-tests", (req, res) => {
   const userId = req.session.userId;
+  if (!userId) {
+    return res.redirect('/login'); // Redirect to login if not logged in
+}
 
   const sql = `SELECT * FROM tests WHERE user_id = ?`;
 
@@ -120,6 +156,10 @@ app.get("/my-tests", (req, res) => {
 });
 
 app.get("/create-test", (req, res) => {
+  const userId = req.session.userId;
+  if (!userId) {
+    return res.redirect('/login'); // Redirect to login if not logged in
+}
   const languages = ISO6391.getAllNames(); // Get all language names
   res.render("create-test", { languages, getCode: ISO6391.getCode });
 });
@@ -128,6 +168,9 @@ app.post("/create-test", (req, res) => {
   // Extract test data from the request body
   const { test_name, language_from, language_to } = req.body;
   const user_id = req.session.userId;
+  if (!user_id) {
+    return res.redirect('/login'); // Redirect to login if not logged in
+}
   console.log("Request Body:", req.body, "User ID:", user_id);
   // SQL to insert a new test into the tests table
   const sql = `INSERT INTO tests (user_id, test_name, language_from, language_to) VALUES (?, ?, ?, ?)`;
@@ -147,68 +190,85 @@ app.post("/create-test", (req, res) => {
 
 app.post("/add-entry/:testId", (req, res) => {
   const testId = req.params.testId;
-  const { word_or_sentence_from, word_or_sentence_to } = req.body;
+  const userId = req.session.userId;
+  if (!userId) {
+    return res.redirect('/login');
+  }
 
-  // SQL to insert a new entry into the entries table
-  const sql = `INSERT INTO entries (test_id, word_or_sentence_from, word_or_sentence_to) VALUES (?, ?, ?)`;
-
-  // Execute the query
-  db.run(
-    sql,
-    [testId, word_or_sentence_from, word_or_sentence_to],
-    function (err) {
-      if (err) {
-        // Handle error
-        console.error(err.message);
-        res.status(500).send("Error adding entry");
-        return;
-      }
-      // Redirect or send a success response
-      res.redirect("/edit-test/" + testId); // Redirect back to the test editing page
-    }
-  );
-});
-
-app.get("/edit-test/:testId", (req, res) => {
-  const testId = req.params.testId;
-
-  // Fetch the test details
-  db.get("SELECT * FROM tests WHERE id = ?", [testId], (err, test) => {
+  // Check if the test belongs to the logged-in user
+  db.get("SELECT * FROM tests WHERE id = ? AND user_id = ?", [testId, userId], (err, test) => {
     if (err) {
-      // Handle error
-      res.status(500).send("Error retrieving test");
-      return;
+      console.error(err.message);
+      return res.status(500).send("Error checking test ownership");
     }
 
-    // Fetch the entries for this test
-    db.all(
-      "SELECT * FROM entries WHERE test_id = ?",
-      [testId],
-      (err, entries) => {
-        if (err) {
-          // Handle error
-          res.status(500).send("Error retrieving entries");
-          return;
-        }
+    if (!test) {
+      return res.status(403).send("You do not have permission to add entries to this test");
+    }
 
-        const languageOptions = ISO6391.getAllNames().map((name) => ({
-          name,
-          code: ISO6391.getCode(name),
-        }));
+    // Proceed with adding the entry
+    const { word_or_sentence_from, word_or_sentence_to } = req.body;
+    const sql = `INSERT INTO entries (test_id, word_or_sentence_from, word_or_sentence_to) VALUES (?, ?, ?)`;
 
-        // Render the edit page, passing test details, entries, and language options
-        res.render("edit-test", {
-          test,
-          entries,
-          languageOptions,
-        });
+    db.run(sql, [testId, word_or_sentence_from, word_or_sentence_to], (err) => {
+      if (err) {
+        console.error(err.message);
+        return res.status(500).send("Error adding entry");
       }
-    );
+
+      res.redirect("/edit-test/" + testId);
+    });
   });
 });
 
+
+app.get("/edit-test/:testId", (req, res) => {
+  const testId = req.params.testId;
+  const userId = req.session.userId;
+  if (!userId) {
+    return res.redirect('/login');
+  }
+
+  // Verify that the test belongs to the logged-in user
+  db.get("SELECT * FROM tests WHERE id = ? AND user_id = ?", [testId, userId], (err, test) => {
+    if (err) {
+      console.error(err.message);
+      return res.status(500).send("Error retrieving test");
+    }
+
+    if (!test) {
+      // If the test does not belong to the user, redirect or show an error
+      return res.status(403).send("You do not have permission to edit this test");
+    }
+
+    // Fetch the entries for this test
+    db.all("SELECT * FROM entries WHERE test_id = ?", [testId], (err, entries) => {
+      if (err) {
+        console.error(err.message);
+        return res.status(500).send("Error retrieving entries");
+      }
+
+      const languageOptions = ISO6391.getAllNames().map((name) => ({
+        name,
+        code: ISO6391.getCode(name),
+      }));
+
+      res.render("edit-test", {
+        test,
+        entries,
+        languageOptions,
+      });
+    });
+  });
+});
+
+
 app.post("/edit-test/:testId", (req, res) => {
   const testId = req.params.testId;
+  const userId = req.session.userId;
+  if (!userId) {
+    return res.redirect('/login'); // Redirect to login if not logged in
+}
   const {
     test_name,
     language_from,
@@ -264,30 +324,45 @@ app.post("/edit-test/:testId", (req, res) => {
 
 app.post("/delete-test/:testId", (req, res) => {
   const testId = req.params.testId;
+  const userId = req.session.userId;
+  if (!userId) {
+    return res.redirect('/login');
+  }
 
-  // Delete the entries first
-  db.run("DELETE FROM entries WHERE test_id = ?", [testId], (err) => {
+  // Check if the test belongs to the logged-in user
+  db.get("SELECT * FROM tests WHERE id = ? AND user_id = ?", [testId, userId], (err, test) => {
     if (err) {
-      // Handle error
-      res.status(500).send("Error deleting entries");
-      return;
+      console.error(err.message);
+      return res.status(500).send("Error checking test ownership");
     }
 
-    // Now delete the test
-    db.run("DELETE FROM tests WHERE id = ?", [testId], (err) => {
+    if (!test) {
+      return res.status(403).send("You do not have permission to delete this test");
+    }
+
+    // Proceed with deleting the test and its entries
+    db.run("DELETE FROM entries WHERE test_id = ?", [testId], (err) => {
       if (err) {
-        // Handle error
-        res.status(500).send("Error deleting test");
-        return;
+        return res.status(500).send("Error deleting test entries");
       }
 
-      res.redirect("/my-tests");
+      db.run("DELETE FROM tests WHERE id = ?", [testId], (err) => {
+        if (err) {
+          return res.status(500).send("Error deleting test");
+        }
+
+        res.redirect("/my-tests");
+      });
     });
   });
 });
 
 app.post("/delete-entry/:entryId", (req, res) => {
   const entryId = req.params.entryId;
+  const userId = req.session.userId;
+  if (!userId) {
+    return res.redirect('/login'); // Redirect to login if not logged in
+}
 
   db.run("DELETE FROM entries WHERE id = ?", [entryId], (err) => {
     if (err) {
@@ -308,13 +383,16 @@ app.post("/delete-entry/:entryId", (req, res) => {
 
 app.get("/run-test/:testId", (req, res) => {
   const testId = req.params.testId;
+  const userId = req.session.userId;
+  if (!userId) {
+    return res.redirect('/login');
+  }
 
-  // First, get the test details
-  db.get("SELECT * FROM tests WHERE id = ?", [testId], (testErr, test) => {
-    if (testErr) {
-      console.error(testErr.message);
-      res.status(500).send("Error retrieving test details");
-      return;
+  // Verify that the test belongs to the logged-in user
+  db.get("SELECT * FROM tests WHERE id = ? AND user_id = ?", [testId, userId], (testErr, test) => {
+    if (testErr || !test) {
+      console.error(testErr?.message);
+      return res.status(403).send("You do not have permission to access this test");
     }
 
     // Add language details to the test object
@@ -344,6 +422,9 @@ app.get("/run-test/:testId", (req, res) => {
 
 app.get('/run-random-test', (req, res) => {
   const userId = req.session.userId; // Assuming user ID is stored in the session
+  if (!userId) {
+    return res.redirect('/login'); // Redirect to login if not logged in
+}
 
   db.all("SELECT id FROM tests WHERE user_id = ?", [userId], (err, tests) => {
     if (err) {
@@ -369,6 +450,9 @@ app.post('/submit-test/:testId', (req, res) => {
   const testId = req.params.testId;
   const userId = req.session.userId;
   const userAnswers = req.body.answers;
+  if (!userId) {
+    return res.redirect('/login'); // Redirect to login if not logged in
+}
 
   // First, retrieve the test details
   db.get("SELECT * FROM tests WHERE id = ?", [testId], (testErr, test) => {
@@ -428,6 +512,9 @@ app.post('/submit-test/:testId', (req, res) => {
 
 app.get('/progress', (req, res) => {
   const userId = req.session.userId;
+  if (!userId) {
+    return res.redirect('/login'); // Redirect to login if not logged in
+}
 
   // SQL to join tests and test_results tables
   const sql = `
@@ -463,6 +550,23 @@ app.get('/progress', (req, res) => {
       highestScore, 
       lowestScore 
     });
+  });
+});
+
+app.get('/profile', (req, res) => {
+  const userId = req.session.userId;
+  if (!userId) {
+      return res.redirect('/login'); // Redirect to login if not logged in
+  }
+
+  db.get("SELECT * FROM users WHERE id = ?", [userId], (err, user) => {
+      if (err) {
+          console.error(err.message);
+          return res.status(500).send("Error retrieving user data");
+      }
+
+      // Render the profile page with user data
+      res.render('profile', { user });
   });
 });
 
