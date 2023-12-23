@@ -13,10 +13,14 @@ app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
 app.use(
   session({
-    secret: process.env.SESSION_SECRET, // Use a secret key for session encryption
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: true,
-    cookie: { secure: false }, // Set to true if using https
+    cookie: { 
+      secure: false, // Set to true if using https
+      maxAge: 900000 // Session expires after 15 minutes of inactivity
+    },
+    rolling: true // Reset the cookie expiration time on every request
   })
 );
 app.use(express.static("public"));
@@ -58,18 +62,30 @@ app.get("/register", (req, res) => {
 });
 
 // Route to handle registration form submission
-app.post("/register", async (req, res) => {
+app.post("/register",// Username validation
+body('username')
+  .isLength({ min: 5, max: 10 })
+  .withMessage('Username must be between 5 and 10 characters long')
+  .matches(/^[A-Za-z0-9]+$/)
+  .withMessage('Username must only contain letters and numbers'),
+
+// Email validation
+body('email')
+  .isEmail()
+  .withMessage('Invalid email format')
+  .matches(/@.*\.(de|net|com|org)$/)
+  .withMessage('Email must end with de, net, com, or org'),
+
+// Password validation
+body('password')
+  .matches(/^(?=.*[A-Z])(?=.*\d)(?=.*[!"$&?§%]).+$/)
+  .withMessage('Password must include one uppercase letter, one number, and one special character from !"$&?§%'),
+async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
   const { username, password } = req.body;
-
-  // Validate username (e.g., length, allowed characters)
-  if (!username || username.length < 3 || username.length > 20) {
-    return res.status(400).send("Username must be between 3 and 20 characters");
-  }
-
-  // Validate password (e.g., minimum length, complexity)
-  if (!password || password.length < 6 || !/[A-Za-z]/.test(password) || !/[0-9]/.test(password)) {
-    return res.status(400).send("Password must be at least 6 characters long and include numbers and letters");
-  }
 
   db.get("SELECT id FROM users WHERE username = ?", [username], async (err, row) => {
     if (err) {
@@ -104,7 +120,15 @@ app.get("/login", (req, res) => {
   res.render("login");
 });
 
-app.post("/login", (req, res) => {
+app.post("/login", [
+  body('username', 'Username is required').notEmpty(),
+  body('password', 'Password is required').notEmpty()
+],
+(req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
   const { username, password } = req.body;
 
   // Basic validation
@@ -161,10 +185,23 @@ app.get("/create-test", (req, res) => {
     return res.redirect('/login'); // Redirect to login if not logged in
 }
   const languages = ISO6391.getAllNames(); // Get all language names
-  res.render("create-test", { languages, getCode: ISO6391.getCode });
+  res.render("create-test", { languages, getCode: ISO6391.getCode});
 });
 
-app.post("/create-test", (req, res) => {
+app.post("/create-test", [
+  body('test_name', 'Test name must be between 3 and 50 characters long')
+    .isLength({ min: 3, max: 50 })
+    .matches(/^[A-Za-z0-9 ]+$/).withMessage('Test name must contain only letters and numbers'),
+  // Include any other validators for language_from, language_to, etc., if needed
+],
+(req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    // You might want to render the same page with error messages
+    // or handle the errors as per your application's design.
+    return res.status(400).json({ errors: errors.array() });
+  }
+
   // Extract test data from the request body
   const { test_name, language_from, language_to } = req.body;
   const user_id = req.session.userId;
@@ -188,9 +225,29 @@ app.post("/create-test", (req, res) => {
   });
 });
 
-app.post("/add-entry/:testId", (req, res) => {
+app.post("/add-entry/:testId", // Add validation checks for the test entries
+body('word_or_sentence_from')
+  .isLength({ min: 1, max: 250 })
+  .matches(/^[a-zA-Z0-9 !?,.]+$/)
+  .withMessage('Entry must be between 1 and 250 characters and can only contain letters, numbers, and !?,.'),
+
+body('word_or_sentence_to')
+  .isLength({ min: 1, max: 250 })
+  .matches(/^[a-zA-Z0-9 !?,.]+$/)
+  .withMessage('Entry must be between 1 and 250 characters and can only contain letters, numbers, and !?,.'),
+
+(req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    // You might want to render the same page with error messages
+    // or handle the errors as per your application's design.
+    return res.status(400).json({ errors: errors.array() });
+  }
   const testId = req.params.testId;
   const userId = req.session.userId;
+  if (!userId) {
+    return res.redirect('/login');
+  }
   if (!userId) {
     return res.redirect('/login');
   }
